@@ -1,0 +1,2 @@
+# DuckMess
+Open-source messenger
