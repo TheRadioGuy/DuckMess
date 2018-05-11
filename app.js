@@ -3,11 +3,10 @@ const express = require('express');
 const app = express();
 const server = require('http').createServer(app);
 const io = require('socket.io')(server);
-global.core = require('./core/core.js');
+global.fs = require('fs-extra');
 global.config = require('./core/config.js');
+global.core = require('./core/core.js');
 const port = process.env.PORT || 8080;
-const fs = require('fs-extra');
-
 const compression = require('compression');
 const fileUpload = require('express-fileupload');
 const sanitizer = require('sanitizer');
