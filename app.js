@@ -12,15 +12,12 @@ const fileUpload = require('express-fileupload');
 const sanitizer = require('sanitizer');
 const bodyParser = require('body-parser'); // include module
 const cookieParser = require('cookie-parser');
-
 const async = require('async');
-
 
 // Routing
 app.use(bodyParser.urlencoded({ // to support URL-encoded bodies
   extended: true
 }));
-
 app.use(compression());
 app.use(cookieParser())
 // app.use(express.static(__dirname + '/public'));
@@ -29,7 +26,7 @@ app.use(fileUpload({
     fileSize: 50 * 1024 * 1024
   },
 }));
-
+app.use(express.static(__dirname + '/public' ));
 app.engine('ejs', require('ejs-locals'));
 app.set('views', __dirname + '/templates');
 app.set('view engine', 'ejs');
@@ -40,6 +37,21 @@ app.get('/', (req, res)=>{
 res.render('index', {});
 })
 
+app.post('/api/:method', async (req,res)=>{
+  var method = req.params.method;
+  var params = {};
+  for(let param in req.body){
+    params[param] = sanitizer.escape(req.body[param]);
+  }
+  console.log(params);
+
+  switch(method){
+    case 'account.exists':
+
+    res.send(await global.core.users.isAccountExists(params.id));
+    break;
+  }
+});
 
 
 /* Not found handler */
