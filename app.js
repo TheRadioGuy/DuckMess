@@ -64,11 +64,20 @@ app.post('/api/:method', async (req,res)=>{
     break;
 
     case 'messages.getDialogs':
-    let userInfo = await global.core.tokens.getTokenInfo(params.token);
+    var userInfo = await global.core.tokens.getTokenInfo(params.token);
     if(userInfo.empty) return res.send(new API(666, 'Auth failed', 1));
 
     res.send((await global.core.messages.getDialogs(userInfo.id)).r);
     break;
+
+    case 'messages.getTokenToMessageConnect':
+    var userInfo = await global.core.tokens.getTokenInfo(params.token);
+    if(userInfo.empty) return res.send(new API(666, 'Auth failed', 1));
+
+    res.send((await global.core.messages.getTokenToMessageConnect(userInfo.id)).r);
+    break;
+
+    
 
     case 'test.getUsers':
     if(NODE_ENV != 'test') res.send('Method not found');
@@ -91,6 +100,37 @@ app.use(function(req, res, next) {
   res.status(404).send('Page is not found');
 });
 
+io.use(async function(socket, next) {
+  var handshakeData = socket.request;
+  var token = handshakeData._query['token'];
+  if(!token){
+    socket.disconnect();
+    next(new Error('not authorized'));
+    return false;
+  } 
+  const {id} = socket;
+  console.log('token : ', token, ' id : ', id);
+  let response = await global.core.messages._connectToWebSocket(token, id);
+
+  if(!response){
+    socket.disconnect();
+    next(new Error('not authorized'));
+    return false;
+  } 
+
+  socket.token = token;
+  console.log('Successful connect to msgs');
+  next();
+});
+
+io.on('connection', async (socket)=>{
+  const {id, token} = socket;
+  socket.on('disconnect', ()=>{
+    global.core.messages._disconnectToWebSockets(token);
+  })
+
+  console.log('connect');
+});
 
 function strstr(haystack, needle, bool) { // Find first occurrence of a string
   //
