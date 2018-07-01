@@ -1,45 +1,37 @@
 module.exports = (sequelize, DataType) => {
-  const User = sequelize.define("users", {
+  const Token = sequelize.define("tokens", {
     id: {
       type: DataType.INTEGER,
       primaryKey: true,
       autoIncrement: true
     },
-    first_name: {
+    user_id: {
+      type: DataType.INTEGER,
+      allowNull: false,
+      validate: {
+        notEmpty: true
+      }
+    },
+    token: {
       type: DataType.STRING,
       allowNull: false,
       validate: {
         notEmpty: true
       }
     },
-    last_name: {
-      type: DataType.STRING,
+    time: {
+      type: DataType.INTEGER,
       allowNull: false,
       validate: {
         notEmpty: true
       }
     },
-    email: {
-      type: DataType.STRING,
+    expires: {
+      type: DataType.INTEGER,
       allowNull: false,
       validate: {
         notEmpty: true
       }
-    },
-    image: {
-      type: DataType.STRING,
-      defaultValue: 'default'
-    },
-    login: {
-      type: DataType.STRING,
-      allowNull: false,
-      validate: {
-        notEmpty: true
-      }
-    },
-    rights: {
-      type: DataType.STRING,
-      defaultValue: 1
     }
   }, {
     classMethods: {
@@ -49,5 +41,5 @@ module.exports = (sequelize, DataType) => {
     }
   });
 
-  return User;
+  return Token;
 };

@@ -1,45 +1,44 @@
 module.exports = (sequelize, DataType) => {
-  const User = sequelize.define("users", {
+  const Dialog = sequelize.define("dialogs", {
     id: {
       type: DataType.INTEGER,
       primaryKey: true,
       autoIncrement: true
     },
-    first_name: {
-      type: DataType.STRING,
+    lastMessage: {
+      type: DataType.TEXT,
       allowNull: false,
       validate: {
         notEmpty: true
       }
     },
-    last_name: {
-      type: DataType.STRING,
+    author_id: {
+      type: DataType.INTEGER,
       allowNull: false,
       validate: {
         notEmpty: true
       }
     },
-    email: {
-      type: DataType.STRING,
+    to_id: {
+      type: DataType.INTEGER,
       allowNull: false,
       validate: {
         notEmpty: true
       }
     },
-    image: {
-      type: DataType.STRING,
-      defaultValue: 'default'
-    },
-    login: {
-      type: DataType.STRING,
+    owned_id: {
+      type: DataType.INTEGER,
       allowNull: false,
       validate: {
         notEmpty: true
       }
     },
-    rights: {
-      type: DataType.STRING,
-      defaultValue: 1
+    time: {
+      type: DataType.INTEGER,
+      allowNull: false,
+      validate: {
+        notEmpty: true
+      }
     }
   }, {
     classMethods: {
@@ -49,5 +48,5 @@ module.exports = (sequelize, DataType) => {
     }
   });
 
-  return User;
+  return Dialog;
 };

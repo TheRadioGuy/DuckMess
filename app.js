@@ -3,9 +3,12 @@ const express = require('express');
 const app = express();
 const server = require('http').createServer(app);
 const io = require('socket.io')(server);
+const redisAdapter = require('socket.io-redis');
+io.adapter(redisAdapter({ host: 'localhost', port: 6379 }));
 global.fs = require('fs-extra');
 global.config = require('./core/config.js');
 global.core = require('./core/core.js');
+global.e = require('./core/errors.js');
 const port = process.env.PORT || 8080;
 const compression = require('compression');
 const fileUpload = require('express-fileupload');
@@ -13,7 +16,7 @@ const sanitizer = require('sanitizer');
 const bodyParser = require('body-parser'); // include module
 const cookieParser = require('cookie-parser');
 const async = require('async');
-
+const NODE_ENV = 'test';
 // Routing
 app.use(bodyParser.urlencoded({ // to support URL-encoded bodies
   extended: true
@@ -35,7 +38,8 @@ app.set('view engine', 'ejs');
 
 app.get('/', (req, res)=>{
 res.render('index', {});
-})
+});
+
 
 app.post('/api/:method', async (req,res)=>{
   var method = req.params.method;
@@ -47,8 +51,34 @@ app.post('/api/:method', async (req,res)=>{
 
   switch(method){
     case 'account.exists':
+    res.send((await global.core.users.isAccountExists(params.id)).r);
+    break;
+    case 'account.register':
+    res.send((await global.core.users.registerAccount(params.login, params.firstName, params.email)).r);
+    break;
+    case 'account.authUser':
+    res.send((await global.core.users.authUser(params.login)).r);
+    break;
+    case 'account.authCode':
+    res.send((await global.core.users.checkAuthCode(params.login, params.code)).r);
+    break;
 
-    res.send(await global.core.users.isAccountExists(params.id));
+    case 'messages.getDialogs':
+    let userInfo = await global.core.tokens.getTokenInfo(params.token);
+    if(userInfo.empty) return res.send(new API(666, 'Auth failed', 1));
+
+    res.send((await global.core.messages.getDialogs(userInfo.id)).r);
+    break;
+
+    case 'test.getUsers':
+    if(NODE_ENV != 'test') res.send('Method not found');
+    res.send((await global.core.users.testGetAllUsers()).r);
+    break; 
+    case 'utils.getPing':
+    res.send('pong');
+    break;
+    case 'utils.getErrors':
+    res.send(global.e);
     break;
   }
 });

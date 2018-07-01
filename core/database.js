@@ -19,7 +19,12 @@ module.exports = _ => {
 
       });
 
-      sequelize.sync().then(_ => resolve(db)).catch(e => reject(e))
+      db.models.dialogs.belongsTo(db.models.users, {foreignKey:'owned_id'});
+      db.models.users.hasMany(db.models.dialogs, {foreignKey:'owned_id'});
+
+      let force = false;
+      if(process.argv[3]=="true") force = true;
+      sequelize.sync({force}).then(_ => resolve(db)).catch(e => reject(e))
 
     }).catch(e => reject(e));
   });
