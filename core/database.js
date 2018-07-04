@@ -19,8 +19,8 @@ module.exports = _ => {
 
       });
 
-      db.models.dialogs.belongsTo(db.models.users, {foreignKey:'owned_id'});
-      db.models.users.hasMany(db.models.dialogs, {foreignKey:'owned_id'});
+     // db.models.dialogs.belongsTo(db.models.users, {foreignKey:'owned_id'});
+      /*db.models.users.hasMany(db.models.dialogs, {foreignKey:'owned_id'});*/
 
       let force = false;
       if(process.argv[3]=="true") force = true;

@@ -39,6 +39,10 @@ module.exports = (sequelize, DataType) => {
       validate: {
         notEmpty: true
       }
+    },
+    attachment: {
+      type: DataType.STRING,
+      allowNull: true
     }
   }, {
     classMethods: {

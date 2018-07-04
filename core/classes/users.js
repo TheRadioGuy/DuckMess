@@ -15,6 +15,22 @@ async function isAccountExists(login) {
 	else return new API(999, true, 0);
 }
 
+async function getUserInfo(userId, fromApi=false) {
+	let user = await Users.findOne({
+		where: {
+			id: userId
+		},
+		attributes:['first_name', 'image', 'login'],
+		raw:true
+	});
+
+	if(!user) user = {first_name:'Удаленный Аккаунт', image:'deleted', login:'deleted'};
+
+	if(fromApi) return new API(0, user, 0);
+	else return user; 
+
+
+}
 async function registerAccount(login, firstName, email) {
 	var isFound = await Users.findOne({
 		where: {
@@ -98,5 +114,6 @@ module.exports = {
 	authUser,
 	testGetAllUsers,
 	isAccountExists,
-	registerAccount
+	registerAccount,
+	getUserInfo
 };

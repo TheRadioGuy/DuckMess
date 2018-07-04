@@ -8,6 +8,7 @@ io.adapter(redisAdapter({ host: 'localhost', port: 6379 }));
 global.fs = require('fs-extra');
 global.config = require('./core/config.js');
 global.core = require('./core/core.js');
+global.core.io = io;
 global.e = require('./core/errors.js');
 const port = process.env.PORT || 8080;
 const compression = require('compression');
@@ -75,6 +76,24 @@ app.post('/api/:method', async (req,res)=>{
     if(userInfo.empty) return res.send(new API(666, 'Auth failed', 1));
 
     res.send((await global.core.messages.getTokenToMessageConnect(userInfo.id)).r);
+    break;
+
+    case 'messages.send':
+    var userInfo = await global.core.tokens.getTokenInfo(params.token);
+    if(userInfo.empty) return res.send(new API(666, 'Auth failed', 1));
+
+    res.send((await global.core.messages.sendMessage(userInfo.id, params.to, params.text, params.attachment)).r);
+    break;
+
+    case 'messages.get':
+    var userInfo = await global.core.tokens.getTokenInfo(params.token);
+    if(userInfo.empty) return res.send(new API(666, 'Auth failed', 1));
+
+    res.send((await global.core.messages.getMessages(userInfo.id, params.userId, params.count, params.offset)).r);
+    break;
+
+    case 'users.get':
+    res.send((await global.core.users.getUserInfo(params.userId, true)).r);
     break;
 
     

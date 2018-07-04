@@ -4,7 +4,7 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "prestart": "sudo systemctl start redis && sudo systemctl start postgresql"
   },
   "author": "DuckerMan",
   "license": "ISC",
@@ -16,6 +16,7 @@
     "ejs-locals": "^1.0.2",
     "express": "^4.16.3",
     "express-fileupload": "^0.4.0",
+    "fastify": "^1.7.0",
     "fs-extra": "^6.0.0",
     "mysql2": "^1.5.3",
     "pg": "^7.4.3",
