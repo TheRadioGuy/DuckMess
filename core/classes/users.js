@@ -24,7 +24,7 @@ async function getUserInfo(userId, fromApi=false) {
 		raw:true
 	});
 
-	if(!user) user = {first_name:'Удаленный Аккаунт', image:'deleted', login:'deleted'};
+	if(!user) user = {first_name:'Удаленный Аккаунт', image:'default', login:'deleted'};
 
 	if(fromApi) return new API(0, user, 0);
 	else return user; 

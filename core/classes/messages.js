@@ -74,12 +74,19 @@ let dialogTwoPromise = Dialogs
   return new API(global.e.SEND_MESSAGE, paramsToSender, 0);
 }
 
+async function getMessages(id, dialogId, count, offset) {
 
-async function getMessages(id, userId, count, offset) {
+	const dialog = await Dialogs.findOne({
+		where: {
+			id: dialogId
+		},
+		raw: true
+	});
+	// todo групповые беседы
 	let messages = await Messages.findAll({
 		where: {
 			owned_id: id,
-			to_id: userId
+			to_id: dialog.to_id
 		}
 	});
 
@@ -87,7 +94,6 @@ async function getMessages(id, userId, count, offset) {
 
 	return new API(0, messages, 1);
 }
-
 async function getTokenToMessageConnect(id) {
 	let token = sha256((Math.random() * 9999999999 + id + Date.now()).toString()) + sha256((Math.random() * 9999999999 + id + Date.now()).toString());
 	await Tokens.create({

@@ -6,6 +6,7 @@ require('./database.js')().then((db) => {
     var classname = file.replace('.js', ''); // Filename without .js
     module.exports[classname] = require(`./classes/${file}`);
   });
+  
 });
 
 global.toInt = int => isNaN(parseInt(int)) ? 0 : parseInt(int); // true magic

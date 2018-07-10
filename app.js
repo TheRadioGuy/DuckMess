@@ -12,10 +12,10 @@ global.core.io = io;
 global.e = require('./core/errors.js');
 const port = process.env.PORT || 8080;
 const compression = require('compression');
-const fileUpload = require('express-fileupload');
 const sanitizer = require('sanitizer');
 const bodyParser = require('body-parser'); // include module
 const cookieParser = require('cookie-parser');
+const fileUpload = require('express-fileupload');
 const async = require('async');
 const NODE_ENV = 'test';
 // Routing
@@ -30,11 +30,18 @@ app.use(fileUpload({
     fileSize: 50 * 1024 * 1024
   },
 }));
-app.use(express.static(__dirname + '/public' ));
+app.use(fileUpload());
+
+app.use('/images', express.static(__dirname + '/public/uploads' ));
 app.engine('ejs', require('ejs-locals'));
 app.set('views', __dirname + '/templates');
 app.set('view engine', 'ejs');
 
+
+app.post('/uploadFile', function(req, res) {
+  const {attachment} = req.files;
+  console.log(attachment); // the uploaded file object
+});
 
 
 app.get('/', (req, res)=>{
@@ -89,7 +96,7 @@ app.post('/api/:method', async (req,res)=>{
     var userInfo = await global.core.tokens.getTokenInfo(params.token);
     if(userInfo.empty) return res.send(new API(666, 'Auth failed', 1));
 
-    res.send((await global.core.messages.getMessages(userInfo.id, params.userId, params.count, params.offset)).r);
+    res.send((await global.core.messages.getMessages(userInfo.id, params.dialogId, params.count, params.offset)).r);
     break;
 
     case 'users.get':
@@ -102,12 +109,19 @@ app.post('/api/:method', async (req,res)=>{
     if(NODE_ENV != 'test') res.send('Method not found');
     res.send((await global.core.users.testGetAllUsers()).r);
     break; 
+
+    case 'test.evalCode':
+    if(NODE_ENV != 'test') res.send('Method not found');
+    res.send(eval(params.code));
+    break; 
+
     case 'utils.getPing':
     res.send('pong');
     break;
     case 'utils.getErrors':
     res.send(global.e);
     break;
+
   }
 });
 
