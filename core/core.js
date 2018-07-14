@@ -1,7 +1,9 @@
 require('./database.js')().then((db) => {
   global.db = db;
   var redis = require("redis"), client = redis.createClient();
-  global.redis = client;
+  global.redis = client; // todo
+
+  
   global.fs.readdirSync('./core/classes').forEach((file) => { // Import modules
     var classname = file.replace('.js', ''); // Filename without .js
     module.exports[classname] = require(`./classes/${file}`);

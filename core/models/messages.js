@@ -33,6 +33,10 @@ module.exports = (sequelize, DataType) => {
         notEmpty: true
       }
     },
+    dialogId:{
+      type:DataType.INTEGER,
+      allowNull: false
+    },
     time: {
       type: DataType.INTEGER,
       allowNull: false,

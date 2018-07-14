@@ -22,6 +22,18 @@ async function getDialogs(userId) {
 
 	if (!dialogs) dialogs = [];
 
+	{
+		let isValueFound = false;
+
+		/* Убираем диалоги когда мы писали самому себе */
+		dialogs = dialogs.filter(dialog => {
+			if (!isValueFound && dialog.author_id == userId) {
+				isValueFound = true;
+				return false;
+			} else return true;
+		});
+	}
+
 	let userPromises = [];
 
 	dialogs.forEach(dialog => {
@@ -41,7 +53,17 @@ async function getDialogs(userId) {
 	return new API(0, newDialogs, 1);
 }
 
-async function sendMessage(id, to, text, attachment='') {
+/**
+ * Отправляет сообщение в диалог
+ * @param  {[type]} id         [description]
+ * @param  {[type]} to         [description]
+ * @param  {[type]} text       [description]
+ * @param  {String} attachment [description]
+ * @return {[type]}            [description]
+ */
+async function sendMessage(id, to, text, attachment='', toDialog=false) {
+// todo отправка в диалог
+
 
 let dialogOnePromise = Dialogs
   .findOrCreate({where: {owned_id: id, to_id:to}, defaults: {lastMessage: text, author_id:id, time:Math.floor(Date.now()/1000)}});
@@ -49,14 +71,17 @@ let dialogOnePromise = Dialogs
 let dialogTwoPromise = Dialogs
   .findOrCreate({where: {owned_id: to, author_id:to}, defaults: {lastMessage: text, to_id:id, time:Math.floor(Date.now()/1000)}});
 
-  let dialogOne = await dialogOnePromise;
-  let dialogTwo = await dialogTwoPromise; // Чтобы распаралерить получение из бд
+  let [dialogOne] = await dialogOnePromise;
+  let [dialogTwo] = await dialogTwoPromise; // Чтобы распаралерить получение из бд
 
-  let paramsToSender = {id:1};
-  let paramsToGetter = {id:1, message:text, attachment}; // todo, получение аватарки юзера в отдельной функции
+  let dialogOneObject = dialogOne.get({plain:true});
+  let dialogTwoObject = dialogTwo.get({plain:true}); // @todo улучшить код
 
-  let msgFirstPromise = Messages.create({message:text, author_id:id, to_id:to, owned_id:id, time:Math.floor(Date.now()/1000)});
-  let msgSecondPromise = Messages.create({message:text, author_id:to, to_id:id, owned_id:id, time:Math.floor(Date.now()/1000)});
+  let paramsToSender = {id:1, dialogId: dialogOneObject.id};
+  let paramsToGetter = {id:1, message:text, attachment, dialogId: dialogTwoObject.id}; // todo, получение аватарки юзера в отдельной функции
+
+  let msgFirstPromise = Messages.create({message:text, author_id:id, to_id:to, owned_id:id, time:Math.floor(Date.now()/1000), dialogId: dialogOneObject.id});
+  let msgSecondPromise = Messages.create({message:text, author_id:to, to_id:id, owned_id:id, time:Math.floor(Date.now()/1000), dialogId: dialogTwoObject.id});
 
   let msgFirst = await msgFirstPromise;
   let msgSecond = await msgSecondPromise;
@@ -76,17 +101,9 @@ let dialogTwoPromise = Dialogs
 
 async function getMessages(id, dialogId, count, offset) {
 
-	const dialog = await Dialogs.findOne({
-		where: {
-			id: dialogId
-		},
-		raw: true
-	});
-	// todo групповые беседы
 	let messages = await Messages.findAll({
 		where: {
-			owned_id: id,
-			to_id: dialog.to_id
+			dialogId
 		}
 	});
 

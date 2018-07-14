@@ -4,8 +4,10 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "prestart": "sudo systemctl start redis && sudo systemctl start postgresql",
-    "start": "node --experimental-worker app.js"
+    "test": "mocha --timeout 10000",
+    "service": "sudo systemctl start redis && sudo systemctl start postgresql",
+    "start": "node --experimental-worker app.js",
+    "start:force":"node --experimental-worker app.js --force"
   },
   "author": "DuckerMan",
   "license": "ISC",
@@ -28,5 +30,9 @@
     "sha256": "^0.2.0",
     "socket.io": "^2.1.0",
     "socket.io-redis": "^5.2.0"
+  },
+  "devDependencies": {
+    "chai": "^4.1.2",
+    "mocha": "^5.2.0"
   }
 }

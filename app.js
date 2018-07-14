@@ -89,7 +89,7 @@ app.post('/api/:method', async (req,res)=>{
     var userInfo = await global.core.tokens.getTokenInfo(params.token);
     if(userInfo.empty) return res.send(new API(666, 'Auth failed', 1));
 
-    res.send((await global.core.messages.sendMessage(userInfo.id, params.to, params.text, params.attachment)).r);
+    res.send((await global.core.messages.sendMessage(userInfo.id, params.to, params.text, params.attachment, params.toDialog)).r);
     break;
 
     case 'messages.get':
