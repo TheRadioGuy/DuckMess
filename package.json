@@ -7,7 +7,7 @@
     "test": "mocha --timeout 10000",
     "service": "sudo systemctl start redis && sudo systemctl start postgresql",
     "start": "node --experimental-worker app.js",
-    "start:force":"node --experimental-worker app.js --force"
+    "start:force": "node --experimental-worker app.js --force"
   },
   "author": "DuckerMan",
   "license": "ISC",
@@ -28,8 +28,10 @@
     "sanitizer": "^0.1.3",
     "sequelize": "^4.37.7",
     "sha256": "^0.2.0",
+    "sharp": "^0.20.5",
     "socket.io": "^2.1.0",
-    "socket.io-redis": "^5.2.0"
+    "socket.io-redis": "^5.2.0",
+    "uuid": "^3.3.2"
   },
   "devDependencies": {
     "chai": "^4.1.2",

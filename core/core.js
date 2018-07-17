@@ -1,14 +1,16 @@
+const fs = require('fs-extra');
+
 require('./database.js')().then((db) => {
   global.db = db;
-  var redis = require("redis"), client = redis.createClient();
+  var redis = require("redis"),
+    client = redis.createClient();
   global.redis = client; // todo
 
-  
-  global.fs.readdirSync('./core/classes').forEach((file) => { // Import modules
+  fs.readdirSync('./core/classes').forEach((file) => { // Import modules
     var classname = file.replace('.js', ''); // Filename without .js
     module.exports[classname] = require(`./classes/${file}`);
   });
-  
+
 });
 
 global.toInt = int => isNaN(parseInt(int)) ? 0 : parseInt(int); // true magic

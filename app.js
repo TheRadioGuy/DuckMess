@@ -18,6 +18,7 @@ const cookieParser = require('cookie-parser');
 const fileUpload = require('express-fileupload');
 const async = require('async');
 const NODE_ENV = 'test';
+const path = require('path');
 // Routing
 app.use(bodyParser.urlencoded({ // to support URL-encoded bodies
   extended: true
@@ -30,7 +31,6 @@ app.use(fileUpload({
     fileSize: 50 * 1024 * 1024
   },
 }));
-app.use(fileUpload());
 
 app.use('/images', express.static(__dirname + '/public/uploads' ));
 app.engine('ejs', require('ejs-locals'));
@@ -38,9 +38,21 @@ app.set('views', __dirname + '/templates');
 app.set('view engine', 'ejs');
 
 
-app.post('/uploadFile', function(req, res) {
+app.post('/uploadFile/:token', async function(req, res) {
+
+  let {uploadsPath=0} = global.config.uploads;
+  let {token=0} = req.params;
+  
+  console.log(uploadsPath);
+
   const {attachment} = req.files;
+  const {join} = require('path');
   console.log(attachment); // the uploaded file object
+
+  let uploaded = await attachment.mv(join(uploadsPath, attachment.name));
+  let response = await global.core.attachments._addAttachment(0, attachment);
+  if(!response) return res.send({is_error:1, msg:'Erorr'});
+  else res.send(response);
 });
 
 

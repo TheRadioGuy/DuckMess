@@ -1,3 +1,4 @@
+const {join} = require('path');
 module.exports = {
 	db:{
 		database:'DuckMess',
@@ -14,5 +15,8 @@ module.exports = {
 		    idle: 10000
 		  }
 		}
+	},
+	uploads:{
+		uploadsPath:join(__dirname, '..', 'public', 'uploads')
 	}
 };
