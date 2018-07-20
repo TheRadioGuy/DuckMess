@@ -51,6 +51,7 @@ app.post('/uploadFile/:token', async function(req, res) {
   console.log(attachment); // the uploaded file object
 
   let uploaded = await attachment.mv(join(uploadsPath, attachment.name));
+  
   let response = await global.core.attachments._addAttachment(0, attachment);
   if(!response) return res.send({is_error:1, msg:'Error'});
   else res.send(response);
@@ -116,17 +117,17 @@ app.post('/api/:method', async (req,res)=>{
     res.send((await global.core.users.getUserInfo(params.userId, true)).r);
     break;
 
-    
 
-    case 'test.getUsers':
+
+    case 'test.getModels':
     if(NODE_ENV != 'test') res.send('Method not found');
-    res.send((await global.core.users.testGetAllUsers()).r);
-    break; 
+    res.send((await global.db.models[params.model].findAll({raw:true})));
+    break;
 
     case 'test.evalCode':
     if(NODE_ENV != 'test') res.send('Method not found');
     res.send(eval(params.code));
-    break; 
+    break;
 
     case 'utils.getPing':
     res.send('pong');
@@ -153,7 +154,7 @@ io.use(async function(socket, next) {
     socket.disconnect();
     next(new Error('not authorized'));
     return false;
-  } 
+  }
   const {id} = socket;
   console.log('token : ', token, ' id : ', id);
   let response = await global.core.messages._connectToWebSocket(token, id);
@@ -162,7 +163,7 @@ io.use(async function(socket, next) {
     socket.disconnect();
     next(new Error('not authorized'));
     return false;
-  } 
+  }
 
   socket.token = token;
   console.log('Successful connect to msgs');

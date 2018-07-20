@@ -6,7 +6,7 @@ const {
 } = require('worker_threads');
 
 const {unlink:unlinkFile} = require('fs-extra');
-
+const {uploadsPath} = global.config.uploads;
 
 	const Op = global.db.Sequelize.Op;
 	const Attachments = global.db.models.attachments;
@@ -35,20 +35,23 @@ const {unlink:unlinkFile} = require('fs-extra');
 			return {is_error:1, msg:'unsuppoerted'};
 		}
 
-		
+
 
 		return response;
 
+		async function _writeAsDocument(id, file){
+			let name = uuidv4();
+		}
 
 		async function _writeAsPhoto(id, file){
-			try{
+			try {
 				let name = uuidv4();
 				let filename = file.name;
 				let photos = await _processPhoto(filename, name);
 
 			let attachment = await Attachments.create({
 				ownerId: id,
-				hashKey: 'test',
+				hashKey: file.md5,
 				time: Math.floor(Date.now() / 1000),
 				imageSmallInfo: `${photos.size_68.width}, ${photos.size_68.height}, ${photos.size_68.path}`,
 				imageMediumInfo: `${photos.size_525.width}, ${photos.size_525.height}, ${photos.size_525.path}`,
@@ -68,9 +71,9 @@ const {unlink:unlinkFile} = require('fs-extra');
 				console.log(e);
 				return false;
 			}
-			
+
 		}
-		
+
 		// Attachments.create({ownerId:id, hashKey:'test', time:Math.floor(Date.now()/1000)});
 	}
 
@@ -87,7 +90,7 @@ async function _processPhoto(file, name) {
 		extname
 	} = require('path');
 
-	let {uploadsPath} = global.config.uploads;
+
 	let filePath = join(uploadsPath, file);
 
 	let photos = {};

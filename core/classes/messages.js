@@ -25,9 +25,9 @@ async function getDialogs(userId) {
 	{
 		let isValueFound = false;
 
-		/* Убираем диалоги когда мы писали самому себе */
+		// Убираем диалоги когда мы писали самому себе 
 		dialogs = dialogs.filter(dialog => {
-			if (!isValueFound && dialog.author_id == userId) {
+			if (!isValueFound && dialog.author_id == userId && dialog.to_id == userId) {
 				isValueFound = true;
 				return false;
 			} else return true;
@@ -79,6 +79,15 @@ let dialogTwoPromise = Dialogs
 
   let paramsToSender = {id:1, dialogId: dialogOneObject.id};
   let paramsToGetter = {id:1, message:text, attachment, dialogId: dialogTwoObject.id}; // todo, получение аватарки юзера в отдельной функции
+	// @todo улучшить код + and
+
+	Dialogs.update({
+		lastMessage: text
+	}, {
+		where: {
+			id: dialogOneObject.id
+		}
+	});
 
   let msgFirstPromise = Messages.create({message:text, author_id:id, to_id:to, owned_id:id, time:Math.floor(Date.now()/1000), dialogId: dialogOneObject.id});
   let msgSecondPromise = Messages.create({message:text, author_id:to, to_id:id, owned_id:id, time:Math.floor(Date.now()/1000), dialogId: dialogTwoObject.id});
@@ -101,6 +110,8 @@ let dialogTwoPromise = Dialogs
 
 async function getMessages(id, dialogId, count, offset) {
 
+	if(!(await _isUserInDialog(id, dialogId))) return new API(global.e.ACCESS_ERROR, 'Access denied!', 1);
+
 	let messages = await Messages.findAll({
 		where: {
 			dialogId
@@ -111,6 +122,8 @@ async function getMessages(id, dialogId, count, offset) {
 
 	return new API(0, messages, 1);
 }
+
+
 async function getTokenToMessageConnect(id) {
 	let token = sha256((Math.random() * 9999999999 + id + Date.now()).toString()) + sha256((Math.random() * 9999999999 + id + Date.now()).toString());
 	await Tokens.create({
@@ -152,6 +165,20 @@ async function _getWebSocketsByUserId(id) {
 		raw:true
 	});
 	return ids.map(({socket_id}) => socket_id);
+}
+
+// всякие утилиты
+
+async function _isUserInDialog(id, dialogId) {
+	const dialog = await Dialogs.findOne({
+		where: {
+			owned_id: id,
+			id:dialogId
+		},
+		raw: true
+	});
+	if(!dialog) return false;
+	else return true;
 }
 
 module.exports = {
