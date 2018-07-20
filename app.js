@@ -1,4 +1,5 @@
-// Setup basic express server
+require('dotenv').config();
+
 const express = require('express');
 const app = express();
 const server = require('http').createServer(app);
@@ -42,7 +43,7 @@ app.post('/uploadFile/:token', async function(req, res) {
 
   let {uploadsPath=0} = global.config.uploads;
   let {token=0} = req.params;
-  
+
   console.log(uploadsPath);
 
   const {attachment} = req.files;
@@ -51,7 +52,7 @@ app.post('/uploadFile/:token', async function(req, res) {
 
   let uploaded = await attachment.mv(join(uploadsPath, attachment.name));
   let response = await global.core.attachments._addAttachment(0, attachment);
-  if(!response) return res.send({is_error:1, msg:'Erorr'});
+  if(!response) return res.send({is_error:1, msg:'Error'});
   else res.send(response);
 });
 

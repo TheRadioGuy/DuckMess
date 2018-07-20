@@ -20,15 +20,30 @@ const {unlink:unlinkFile} = require('fs-extra');
 	async function _addAttachment(id, file) {
 		var response;
 
+		const types = {image:'image'};
 
-		response = await _writeAsPhoto(id, file.name);
+		let fileMimeType = file.mimetype.split('/')[0];
+		let filetype = types[fileMimeType];
+		if(!filetype) filetype = 'document';
+		file.type = filetype;
+		console.log(filetype);
+
+		if(filetype == 'image'){
+			response = await _writeAsPhoto(id, file);
+		}
+		else{
+			return {is_error:1, msg:'unsuppoerted'};
+		}
+
+		
 
 		return response;
 
 
-		async function _writeAsPhoto(id, filename){
+		async function _writeAsPhoto(id, file){
 			try{
 				let name = uuidv4();
+				let filename = file.name;
 				let photos = await _processPhoto(filename, name);
 
 			let attachment = await Attachments.create({
@@ -38,8 +53,11 @@ const {unlink:unlinkFile} = require('fs-extra');
 				imageSmallInfo: `${photos.size_68.width}, ${photos.size_68.height}, ${photos.size_68.path}`,
 				imageMediumInfo: `${photos.size_525.width}, ${photos.size_525.height}, ${photos.size_525.path}`,
 				imageCompressedInfo: `${photos.compressed.width}, ${photos.compressed.height}, ${photos.compressed.path}`,
-				fileInfo:`${filename}, ${photos.compressed.path}`
+				fileInfo:`${filename}, ${photos.compressed.path}`,
+				type:file.type
 			});
+
+			console.log(attachment.getImageInfo('imageSmallInfo'));
 			let photoId = attachment.get({plain:true}).id;
 
 			photos.info = {id:photoId};

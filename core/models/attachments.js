@@ -37,6 +37,10 @@ module.exports = (sequelize, DataType) => {
     fileInfo: {
       type: DataType.STRING,
       allowNull: false
+    },
+    type:{
+      type: DataType.STRING(11),
+      allowNull:false
     }
   }, {
     getterMethods: {

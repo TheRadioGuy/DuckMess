@@ -46,7 +46,6 @@ async function registerAccount(login, firstName, email) {
 
 	let user = await Users.create({
 		first_name: firstName,
-		last_name: 1,
 		email: email,
 		rights: 1,
 		login: login
