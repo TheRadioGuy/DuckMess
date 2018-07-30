@@ -71,15 +71,32 @@ let dialogOnePromise = Dialogs
 let dialogTwoPromise = Dialogs
   .findOrCreate({where: {owned_id: to, author_id:to}, defaults: {lastMessage: text, to_id:id, time:Math.floor(Date.now()/1000)}});
 
-  let [dialogOne] = await dialogOnePromise;
-  let [dialogTwo] = await dialogTwoPromise; // Чтобы распаралерить получение из бд
+  let [dialogOne, dialogOneisCreated] = await dialogOnePromise;
+  let [dialogTwo, dialogTwoIsCreated] = await dialogTwoPromise; // Чтобы распаралерить получение из бд
 
   let dialogOneObject = dialogOne.get({plain:true});
   let dialogTwoObject = dialogTwo.get({plain:true}); // @todo улучшить код
 
-  let paramsToSender = {id:1, dialogId: dialogOneObject.id};
-  let paramsToGetter = {id:1, message:text, attachment, dialogId: dialogTwoObject.id}; // todo, получение аватарки юзера в отдельной функции
+  var paramsToSender = {id:1, dialogId: dialogOneObject.id, need_create: dialogOneisCreated, to_id:to};
+  var paramsToGetter = {id:1, message:text, attachment, dialogId: dialogTwoObject.id, need_create:dialogTwoIsCreated, from_id:id}; // todo, получение аватарки юзера в отдельной функции
 	// @todo улучшить код + and
+
+	// если диалог не существует у пользователя то отправляем ему информацию об нем
+	
+	{
+		let userInfoPromise = global.core.users.getUserInfo(to);
+		let userInfo = await userInfoPromise;
+
+		paramsToSender = Object.assign(userInfo, paramsToSender);
+	} 
+
+	{
+		let userInfoPromise = global.core.users.getUserInfo(id);
+		let userInfo = await userInfoPromise;
+
+		paramsToGetter = Object.assign(userInfo, paramsToGetter);
+	} 
+
 
 	Dialogs.update({
 		lastMessage: text
@@ -110,12 +127,16 @@ let dialogTwoPromise = Dialogs
 
 async function getMessages(id, dialogId, count, offset) {
 
-	if(!(await _isUserInDialog(id, dialogId))) return new API(global.e.ACCESS_ERROR, 'Access denied!', 1);
+	if(!(await _getDialogId(id, dialogId))) return new API(global.e.ACCESS_ERROR, 'Access denied!', 1);
+	
+	offset = parseInt(offset);
 
 	let messages = await Messages.findAll({
 		where: {
 			dialogId
-		}
+		},
+		limit:count,
+		offset
 	});
 
 	if (!messages) messages = [];
@@ -169,7 +190,9 @@ async function _getWebSocketsByUserId(id) {
 
 // всякие утилиты
 
-async function _isUserInDialog(id, dialogId) {
+
+
+async function _getDialogId(id, dialogId){
 	const dialog = await Dialogs.findOne({
 		where: {
 			owned_id: id,
@@ -177,8 +200,8 @@ async function _isUserInDialog(id, dialogId) {
 		},
 		raw: true
 	});
-	if(!dialog) return false;
-	else return true;
+	if(!dialog) return 0;
+	else return dialog.id;
 }
 
 module.exports = {

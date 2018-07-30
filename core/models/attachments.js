@@ -1,46 +1,38 @@
 module.exports = (sequelize, DataType) => {
-  const Attachment = sequelize.define("attachments", {
-    id: {
+  const Attachment = sequelize.define("attachments_news", {
+    Id: {
       type: DataType.INTEGER,
       primaryKey: true,
       autoIncrement: true
     },
-    ownerId: {
+    OwnerId: {
       type: DataType.INTEGER,
       allowNull: false,
       validate: {
         notEmpty: true
       }
     },
-    hashKey: {
+    HashKey: {
       type: DataType.STRING(64)
     },
-    time: {
+    Time: {
       type: DataType.INTEGER,
       allowNull: false,
       validate: {
         notEmpty: true
       }
     },
-    imageSmallInfo: {
+    FileInfo: {
       type: DataType.STRING,
       allowNull: true
     },
-    imageMediumInfo: {
+    Filepath: {
       type: DataType.STRING,
       allowNull: true
     },
-    imageCompressedInfo: {
+    Doctypes: {
       type: DataType.STRING,
       allowNull: true
-    },
-    fileInfo: {
-      type: DataType.STRING,
-      allowNull: false
-    },
-    type:{
-      type: DataType.STRING(11),
-      allowNull:false
     }
   }, {
     getterMethods: {
