@@ -1,7 +1,6 @@
 var redis = require("redis"),
 	client = redis.createClient();
 
-
 client.on("error", function(err) {
 	console.log("Redis ERROR  " + err);
 });
@@ -25,4 +24,10 @@ const setCode = (type = 'authcode', login, code, time = 360) => {
 	});
 }
 
-module.exports = {getCode, setCode};
+const addUploadToken = (token, userid) => {
+	return new Promise((resolve, reject) => {
+		client.set(`messenger.token.${token}`, userid, 10, () => resolve(true)); // todo найти нормальное время удаления
+	});
+}
+
+module.exports = {getCode, setCode, addUploadToken};

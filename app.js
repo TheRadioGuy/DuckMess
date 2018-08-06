@@ -117,7 +117,12 @@ app.post('/api/:method', async (req,res)=>{
     res.send((await global.core.users.getUserInfo(params.userId, true)).r);
     break;
 
+    case 'attachments.generateToken':
+    var userInfo = await global.core.tokens.getTokenInfo(params.token);
+    if(userInfo.empty) return res.send(new API(666, 'Auth failed', 1));
 
+    res.send((await global.core.attachments.generateToken(userInfo.id)).r);
+    break;
 
     case 'test.getModels':
     if(NODE_ENV != 'test') res.send('Method not found');

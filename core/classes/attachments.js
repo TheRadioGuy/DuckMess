@@ -77,7 +77,16 @@ const {uploadsPath} = global.config.uploads;
 		// Attachments.create({ownerId:id, hashKey:'test', time:Math.floor(Date.now()/1000)});
 	}
 
-	module.exports = {_addAttachment};
+	async function generateToken(id){
+		if(!id) return;
+		let token = uuidv4();
+
+		await global.core.redis.addUploadToken(token, id);
+
+		return new API(0, token, 0);
+	}
+
+	module.exports = {_addAttachment, generateToken};
 	// _addAttachment(0, 'default.jpg').then(r=>console.log(r));
 
 

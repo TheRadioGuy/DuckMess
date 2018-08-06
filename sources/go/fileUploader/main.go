@@ -14,6 +14,7 @@ import (
      "github.com/jinzhu/gorm"
      _ "github.com/jinzhu/gorm/dialects/postgres"
     "io/ioutil"
+    "github.com/go-redis/redis"
     "strings"
 )
 
@@ -47,10 +48,12 @@ type AttachmentsNew struct {
 
 var Database *gorm.DB;
 
+var RedisClient *redis.Client;
 
 func main() {
 
 	databaseInit();
+	createRedisClient();
 
 	defer Database.Close()
 
@@ -71,6 +74,15 @@ func main() {
     app.Post("/uploadFile/{token}", iris.LimitRequestBodySize(10<<20), func(ctx iris.Context) {
         // Get the file from the dropzone request
         token := ctx.Params().Get("token");
+
+        userId := getUserId(token);
+
+        fmt.Println("user " , userId);
+
+        if(userId == "0"){
+        	ctx.StatusCode(iris.StatusInternalServerError);
+        	return;
+        }
         fmt.Println(token);
         file, info, err := ctx.FormFile("file")
         if err != nil {
@@ -241,4 +253,24 @@ func check(err error){
 	if(err != nil){
 		panic(err);
 	}
+}
+
+func createRedisClient(){
+	client := redis.NewClient(&redis.Options{
+		Addr:     "localhost:6379",
+		Password: "", // no password set
+		DB:       0,  // use default DB
+	})
+	_, err := client.Ping().Result();
+
+	RedisClient = client;
+
+	check(err);
+}
+
+func getUserId(token string) string{
+	val, err := RedisClient.Get("messenger.token." + token).Result();
+
+	if(err != nil) { return "0"; }
+	return val;
 }
